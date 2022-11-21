@@ -1,6 +1,6 @@
 const auth = require('../auth');
 
-const TABLE = 'Users'
+const TABLE = 'users'
 
 module.exports = (dbInject) => {
 
@@ -9,17 +9,18 @@ module.exports = (dbInject) => {
         db =  require('../../DB/mysql');
     }
     
-    const getAllUsers = () => db.getAllUsers(TABLE)
-    const getUser = (id) => db.getUser(TABLE, id)
+    const getAllUsers = () => db.getAllItems(TABLE)
+    const getUser = (id) => db.getItem(TABLE, id)
     const addUser = async (body) => {
         const user = {
             id: body.id,
             name: body.name,
             email: body.email,
             role: body.role,
-            active: body.active
+            photo: body.photo,
+            groups: body.groups
         }
-        const requestUser = await db.addUser(TABLE, user)
+        const requestUser = await db.insertItem(TABLE, user)
         let insertId = 0;
         if (body.id === 0) {
             insertId = requestUser.insertId
@@ -36,7 +37,7 @@ module.exports = (dbInject) => {
         }
         return requestAuth
     }
-    const deleteUser = (body) => db.deleteUser(TABLE, body)
+    const deleteUser = (body) => db.deleteItem(TABLE, body)
 
     return {
         getAllUsers,

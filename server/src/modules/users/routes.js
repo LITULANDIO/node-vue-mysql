@@ -6,7 +6,7 @@ const security = require('./security')
 
 router.get('/', getAllUsers)
 router.get('/:id', getUser)
-router.post('/', security(), addUser)
+router.post('/', /*security(),*/ addUser)
 router.put('/', security(), deleteUser)
 
 async function getAllUsers(req, res, next){
@@ -29,7 +29,7 @@ async function addUser(req, res, next){
     try {
         const data = await controller.addUser(req.body)
         req.body.id === 0 ? message = 'User guardat correctament' : message = 'User actualitzat correctament'
-        requests.success(req, res, message, 200)
+        requests.success(req, res, message, 204)
     } catch(error) {
         next(error)
     }

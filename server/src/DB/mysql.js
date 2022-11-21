@@ -32,7 +32,7 @@ const connectMysql = () => {
 
 connectMysql();
 
-const getAllUsers = (table) => {
+const getAllItems = (table) => {
     return new Promise((resolve, reject) => {
         connection.query(`SELECT * FROM ${table}`, (error, result) => {
             error ? reject(error) : resolve(result)
@@ -40,7 +40,8 @@ const getAllUsers = (table) => {
     })
 }
 
-const getUser = (table, id) => {
+const getItem = (table, id) => {
+    console.log('[get =>', table, id)
     return new Promise((resolve, reject) => {
         connection.query(`SELECT * FROM ${table} WHERE id=${id}`, (error, result) => {
             error ? reject(error) : resolve(result)
@@ -48,7 +49,7 @@ const getUser = (table, id) => {
     })
 }
 
-const addUser = (table, data) => {
+const insertItem = (table, data) => {
     console.log('[AddUser =>', data)
     return new Promise((resolve, reject) => {
         connection.query(`INSERT INTO ${table} SET ? ON DUPLICATE KEY UPDATE ?`, [data,data], (error, result) => {
@@ -57,7 +58,7 @@ const addUser = (table, data) => {
     })
 }
 
-const deleteUser = (table, data) => {
+const deleteItem = (table, data) => {
     return new Promise((resolve, reject) => {
         connection.query(`DELETE FROM ${table} WHERE id = ?`, data.id, (error, result) => {
             error ? reject(error) : resolve(result)
@@ -75,10 +76,10 @@ function query(table, consult) {
 
 
 module.exports = {
-    getAllUsers,
-    getUser,
-    addUser,
-    deleteUser,
+    getAllItems,
+    getItem,
+    insertItem,
+    deleteItem,
     query
 }
 
