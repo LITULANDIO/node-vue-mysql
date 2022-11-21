@@ -3,6 +3,9 @@ const morgan = require('morgan')
 const http = require("http"); 
 const users = require('./modules/users/routes')
 const auth = require('./modules/auth/routes')
+const groups = require('./modules/groups/routes')
+const wishes = require('./modules/wishes/routes')
+
 const app = express();
 const error = require('./red/errors')
 const host = 'localhost';
@@ -25,6 +28,9 @@ app.set('port', port)
 // routes
 app.use('/api/users', users)
 app.use('/api/auth', auth)
+app.use('/api/user/group', groups)
+app.use('/api/user/wishes', wishes)
+
 app.use(error)
 
 module.exports = app;
