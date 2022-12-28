@@ -3,11 +3,12 @@ const router = express.Router();
 const requests = require('../../red/requests')
 const controller = require('./index')
 
-router.get('/login', login)
+router.post('/login', login)
 router.get('/logout', logout)
 
 
 async function login(req, res, next) {
+    console.log('login =>', req.body)
     try {
         const token = await controller.login(req.body.user, req.body.password)
         requests.success(req, res, token, 200)

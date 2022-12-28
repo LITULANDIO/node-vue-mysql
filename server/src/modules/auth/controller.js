@@ -10,16 +10,30 @@ module.exports = (dbInject) => {
     }
 
     const login = async (user, password) => {
-        const data = await db.query(TABLE, { user: user });
-        data.active = 1
-        db.insertItem(TABLE, data)
-        console.log(data)
+        let data;
+        try{
+            data = await db.query(TABLE, { user: user });
+            data.active = 1
+            db.insertItem(TABLE, data)
+            console.log(data)
+        }catch(error){
+            return {
+                error: true,
+                msg: "La contraseña o el nombre de usuario no son correctos"
+
+            }
+            
+        }
         return bcrypt.compare(password, data.password)
             .then(result => {
                 if (result === true) {
-                    return auth.assignToken({...data})
+                    return { token: auth.assignToken({...data}), id: data.id, user: data.user }
                 } else {
-                    throw new Error('Informació inválida')
+                    return {
+                        error: true,
+                        msg: "La contraseña o el nombre de usuario no son correctos"
+        
+                    }
                 }
             })
     }

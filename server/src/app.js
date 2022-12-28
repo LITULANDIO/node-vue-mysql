@@ -5,7 +5,7 @@ const users = require('./modules/users/routes')
 const auth = require('./modules/auth/routes')
 const groups = require('./modules/groups/routes')
 const wishes = require('./modules/wishes/routes')
-
+const cors = require('cors')
 const app = express();
 const error = require('./red/errors')
 const host = 'localhost';
@@ -23,6 +23,16 @@ server.listen(port, host, () => {
 app.use(morgan('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(cors())
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+    res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
+    next();
+});
+
+
 // configuration
 app.set('port', port)
 // routes

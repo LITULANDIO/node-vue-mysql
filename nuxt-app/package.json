@@ -1,0 +1,30 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.13",
+    "nuxt": "3.0.0",
+    "postcss": "^8.4.19",
+    "tailwindcss": "^3.2.4"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.2.1",
+    "@fortawesome/fontawesome-svg-core": "^6.2.1",
+    "@fortawesome/free-solid-svg-icons": "^6.2.1",
+    "@fortawesome/vue-fontawesome": "^3.0.2",
+    "@pinia/nuxt": "^0.4.6",
+    "@vee-validate/rules": "^4.7.3",
+    "axios": "^1.2.0",
+    "jsrsasign": "^10.6.1",
+    "pinia": "^2.0.27",
+    "sass": "^1.56.1",
+    "vee-validate": "^4.7.3",
+    "yup": "^0.32.11"
+  }
+}

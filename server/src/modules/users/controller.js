@@ -14,9 +14,7 @@ module.exports = (dbInject) => {
     const addUser = async (body) => {
         const user = {
             id: body.id,
-            name: body.name,
             email: body.email,
-            role: body.role,
             photo: body.photo,
             groups: body.groups
         }
@@ -32,7 +30,8 @@ module.exports = (dbInject) => {
             requestAuth = await auth.addUser({
                 id: insertId,
                 user: body.user,
-                password: body.password
+                password: body.password,
+                active: 0
             })
         }
         return requestAuth
