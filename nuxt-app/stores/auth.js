@@ -12,15 +12,7 @@ export const useStoreAuth = defineStore('store', {
     }
   },
   actions: {},
-  mutations: {
-    setUser(state, payload) {
-        state.user.id = payload.id
-        state.user.name = payload.user
-    }
-  },
-  getter: {
-    getUser: state => state.user,
-  },
+  getter: {},
   persist: true
 })
 

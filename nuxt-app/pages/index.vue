@@ -79,9 +79,14 @@ import { object, string, ref as yupRef } from "yup";
 import { configure } from "vee-validate";
 import { useRouter } from 'vue-router';
 import { DataProvider } from '@/data-provider/index'
-
+import { useStoreAuth } from '~~/stores/auth';
+const store = useStoreAuth()
 const router = useRouter()
 const errorLogin = ref('')
+const dataUser = reactive({ user: "", password: ""})
+const isOpenModal = ref(false);
+
+console.log(store)
 const onLogin = async () => {
   const result = await DataProvider({
     providerType: 'AUTH',
@@ -91,11 +96,14 @@ const onLogin = async () => {
   if(result.data.body.error){
     errorLogin.value = result.data.body.msg
   } else {
+    store.user = { 
+      id: result.data.body.id, 
+      name: result.data.body.user 
+    }
     router.push({ path: `/dashboard/user-${result.data.body.id}` });
   }
 };
 
-const isOpenModal = ref(false);
 const onOpenModal = () => {
   isOpenModal.value = true
 }
@@ -113,7 +121,6 @@ const schema = object({
   password: string().required().label("Your Password"),
 
 });
-const dataUser = reactive({ user: "", password: ""})
 </script>
 
 <style lang="scss" scoped>
