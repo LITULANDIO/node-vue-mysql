@@ -3,6 +3,7 @@ const router = express.Router();
 const requests = require('../../red/requests')
 const controller = require('./index')
 const security = require('./security')
+const cors = require('cors')
 
 router.get('/', getAllUsers)
 router.get('/:id', getUser)
@@ -27,6 +28,7 @@ async function getUser(req, res, next){
 }
 async function addUser(req, res, next){
     try {
+        console.log('body =>', req.body)
         const data = await controller.addUser(req.body)
         req.body.id === 0 ? message = 'User guardat correctament' : message = 'User actualitzat correctament'
         requests.success(req, res, message, 204)
