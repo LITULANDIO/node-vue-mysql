@@ -75,13 +75,17 @@
 </template>
 <script setup>
 import { ref, reactive } from 'vue'
+import { storeToRefs } from 'pinia'
 import { object, string, ref as yupRef } from "yup";
 import { configure } from "vee-validate";
-import { useRouter } from 'vue-router';
 import { DataProvider } from '@/data-provider/index'
-
-const router = useRouter()
+import { useStoreAuth } from '~~/stores/auth';
+const store = useStoreAuth()
+const { user } = storeToRefs(store)
 const errorLogin = ref('')
+const dataUser = reactive({ user: "", password: ""})
+const isOpenModal = ref(false);
+
 const onLogin = async () => {
   const result = await DataProvider({
     providerType: 'AUTH',
@@ -91,11 +95,12 @@ const onLogin = async () => {
   if(result.data.body.error){
     errorLogin.value = result.data.body.msg
   } else {
-    router.push({ path: `/dashboard/user-${result.data.body.id}` });
+    user.value.id = result.data.body.id 
+    user.value.name = result.data.body.user 
+    navigateTo(`/dashboard/user`);
   }
 };
 
-const isOpenModal = ref(false);
 const onOpenModal = () => {
   isOpenModal.value = true
 }
@@ -113,7 +118,6 @@ const schema = object({
   password: string().required().label("Your Password"),
 
 });
-const dataUser = reactive({ user: "", password: ""})
 </script>
 
 <style lang="scss" scoped>

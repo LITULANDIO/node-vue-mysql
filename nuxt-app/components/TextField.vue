@@ -13,7 +13,8 @@
               autocomplete="off"
               :type="type"
               :name="name"
-              @input="handleValue($event)" />
+              @input="handleValue($event)"
+              @change="previewFile" />
             <span class="icon is-small is-left">
               <font-awesome-icon :icon="icon" />
             </span>
@@ -63,11 +64,16 @@ const props = defineProps({
     default: false
   }
 });
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'changed'])
 
 const handleValue = (event) => {
     emit('update:modelValue', event.target.value)
 }
+const previewFile = () => {
+  console.log('holi')
+  emit('changed')
+}
+
 </script>
 
 <style lang="scss" scoped>
@@ -122,6 +128,15 @@ const handleValue = (event) => {
   border-radius: 0.2rem;
   color: grey;
 }
+.input::-webkit-calendar-picker-indicator{
+  @media (max-width: 768px) {
+    padding-left: 6rem;
+  }
+    padding-left: 12rem;
+    padding-right: 1rem;
+    opacity: 0;
+    cursor: pointer;
+  }
 .is-success{
   color: greenyellow;
 }

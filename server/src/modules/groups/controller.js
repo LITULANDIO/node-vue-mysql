@@ -17,7 +17,7 @@ module.exports = (dbInject) => {
         const group = {
             id: body.id,
             code: await bcrypt.hash(uniqid(), 2),
-            idAdmin: body.idAdmin,
+            admin: body.admin,
             name: body.name,
             date: body.date,
             budget: body.budget,
@@ -29,7 +29,7 @@ module.exports = (dbInject) => {
     const addGuest = async (body) => {
         const group = {
             id: body.id,
-            idAdmin: body.idAdmin,
+            admin: body.admin,
             name: body.name,
             date: body.date,
             budget: body.budget,
