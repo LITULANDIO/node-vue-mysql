@@ -80,7 +80,8 @@ import { object, string, ref as yupRef } from "yup";
 import { configure } from "vee-validate";
 import { DataProvider } from '@/data-provider/index'
 import { useStoreAuth } from '~~/stores/auth';
-const { user } = storeToRefs(useStoreAuth())
+const store = useStoreAuth()
+const { user } = storeToRefs(store)
 const errorLogin = ref('')
 const dataUser = reactive({ user: "", password: ""})
 const isOpenModal = ref(false);
@@ -94,9 +95,9 @@ const onLogin = async () => {
   if(result.data.body.error){
     errorLogin.value = result.data.body.msg
   } else {
-    user.id = result.data.body.id 
-    user.name = result.data.body.user 
-    navigateTo(`/dashboard/user-${result.data.body.id}`);
+    user.value.id = result.data.body.id 
+    user.value.name = result.data.body.user 
+    navigateTo(`/dashboard/user`);
   }
 };
 
