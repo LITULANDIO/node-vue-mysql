@@ -2,6 +2,8 @@ import { getAPI } from './api/api'
 import { AuthDataProvider } from './auth/AuthDataProvider'
 import { UsersDataProvider } from './users/UsersDataProvider'
 import { GroupsDataProvider } from './groups/GroupsDataProvider'
+import { GuestsDataProvider } from './guests/GuestsDataProvider'
+
 
 export const DataProvider = ({providerType, type, params}) => {
     let data = null;
@@ -24,6 +26,13 @@ export const DataProvider = ({providerType, type, params}) => {
             break;
         case "GROUPS": 
             data = GroupsDataProvider({
+                type,
+                params,
+                baseApiUrl: getAPI()
+            });
+            break;
+        case "GUESTS": 
+            data = GuestsDataProvider({
                 type,
                 params,
                 baseApiUrl: getAPI()

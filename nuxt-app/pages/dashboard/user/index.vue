@@ -21,6 +21,7 @@
                 placeholder="Name group"
                 icon="fa-people-line"
                 v-model="dataGroup.name"
+                :value="dataGroup.name"
               />
               <TextField
                 type="date"
@@ -29,6 +30,7 @@
                 placeholder="Date"
                 icon="fa-calendar-days"
                 v-model="dataGroup.date"
+                :value="dataGroup.date"
               />
 
               <TextField
@@ -38,13 +40,43 @@
                 placeholder="Budget"
                 icon="fa-sack-dollar"
                 v-model="dataGroup.budget"
+                :value="dataGroup.budget"
               />
               <div><button :class="{ 'cursor-pointer button-disabled': formMeta.valid, 'cursor-not-allowed button': !formMeta.valid }">Guardar</button></div>
             </VForm>
         </Modal>
+        <Modal header="Entra al grup" :show="isOpenModal" @onClose="onCloseModal">
+          <VForm
+            :validation-schema="schema"
+            :initial-values="dataUser"
+            v-slot="{ meta: formMeta, errors: formErrors }"
+            @submit=""
+          >
+            <TextField
+              type="text"
+              name="user"
+              label="User"
+              placeholder="Usuari"
+              icon="fas fa-user"
+              v-model="dataUser.user"
+              :value="dataUser.user"
+            />
+            <TextField
+              type="password"
+              name="code"
+              label="Code group"
+              placeholder="Code group"
+              icon="fas fa-lock"
+              v-model="dataUser.password"
+              :value="dataUser.password"
+            />
+            <div><button :class="{ 'cursor-pointer button-disabled': formMeta.valid, 'cursor-not-allowed button': !formMeta.valid }">Entrar</button></div>
+          </VForm>
+        </Modal>
     </section>
-    <section class="flex justify-center items-center bottom-0">
-      <div class="create-group fixed" @click="onCreateGroup"><span>CREAR GRUP</span></div>
+    <section class="flex justify-center items-center bottom-0 fixed w-full mb-3">
+      <div class="create-group" @click="onCreateGroup"><span>CREAR GRUP</span></div>
+      <div class="create-group ml-3" @click="onCreateGroup"><span>UNIRSE A UN GRUP</span></div>
     </section>
 </template>
 
@@ -56,15 +88,14 @@ import { useStoreGroup } from '~~/stores/groups';
 import { object, string, ref as yupRef } from "yup";
 import { storeToRefs } from 'pinia'
 import useGroups from '@/composables/groups'
+import useUsers from '@/composables/users'
 const storeAuth = useStoreAuth()
 const storeGroup = useStoreGroup()
 const { user } = storeToRefs(storeAuth)
 const { group } = storeToRefs(storeGroup)
 const { getGroups } = useGroups()
-const router = useRoute()
-const route = useRouter()
-console.log({route}, {router})
-console.log(router.params.id)
+const { getAllUsers } = useUsers()
+
 
 definePageMeta({
   middleware: ["auth"]
@@ -95,15 +126,16 @@ const onSubmitGroup = async () => {
     })
 }
 const onGoGroup = (group) => {
+  unitGroup.value.id = group.id
   unitGroup.value.admin = group.admin
   unitGroup.value.name = group.name
   unitGroup.value.date = group.date
   unitGroup.value.budget = group.budget
-  unitGroup.value.guests = group.guests
   navigateTo(`/dashboard/user/group/${group?.code.split('/')[1] || group?.code}`)
 }
 onMounted(async () => {
   groups.values = await getGroups(user.value.id)
+  console.log('USERS', await getAllUsers())
 })
 </script>
 

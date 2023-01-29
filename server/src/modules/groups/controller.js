@@ -21,19 +21,6 @@ module.exports = (dbInject) => {
             name: body.name,
             date: body.date,
             budget: body.budget,
-            guests: body.guests,
-        }
-        const requestGroup = await db.insertItem(TABLE, group)
-        return requestGroup
-    }
-    const addGuest = async (body) => {
-        const group = {
-            id: body.id,
-            admin: body.admin,
-            name: body.name,
-            date: body.date,
-            budget: body.budget,
-            guests: body.guests
         }
         const requestGroup = await db.insertItem(TABLE, group)
         return requestGroup
@@ -45,7 +32,6 @@ module.exports = (dbInject) => {
         getGroup,
         addGroup,
         deleteGroup,
-        addGuest
 
     }
 }

@@ -19,6 +19,7 @@
             placeholder="Usuari"
             icon="fas fa-user"
             v-model="dataUser.user"
+            :value="dataUser.user"
           />
           <TextField
             type="password"
@@ -27,6 +28,7 @@
             placeholder="Password"
             icon="fas fa-lock"
             v-model="dataUser.password"
+            :value="dataUser.password"
           />
           <span class="text-sm text-red-600">{{ errorLogin }}</span>
           <div class="flex items-center justify-between">
@@ -56,6 +58,7 @@
               placeholder="Usuari"
               icon="fas fa-user"
               v-model="dataUser.user"
+              :value="dataUser.user"
             />
             <TextField
               type="password"
@@ -64,6 +67,7 @@
               placeholder="Code group"
               icon="fas fa-lock"
               v-model="dataUser.password"
+              :value="dataUser.password"
             />
             <div><button :class="{ 'cursor-pointer button-disabled': formMeta.valid, 'cursor-not-allowed button': !formMeta.valid }">Entrar</button></div>
           </VForm>
