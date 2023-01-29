@@ -15,7 +15,18 @@
                 placeholder="Name Friend"
                 icon="fa-user"
                 v-model="dataFriend.name"
+                :value="dataFriend.name"
+                @keyup="onKeyUp"
               />
+                <div v-if="isShowDropdownUsers" class="searching">
+                  <ul>
+                    <li v-if="getUsers.length === 0">No existeix l'usuari</li>
+                    <li @click="onSelectUser($event, user.id)" class="flex justify-start" v-for="user in getUsers" :key="user.id">
+                      <img :src="user.photo" width="40" height="40"/>
+                      <div class="ml-3">{{ user.user }}</div>
+                    </li>
+                  </ul>
+                </div>
               <TextField
                 type="text"
                 name="email"
@@ -23,20 +34,8 @@
                 placeholder="Email"
                 icon="fa-envelope"
                 v-model="dataFriend.email"
+                :value="dataFriend.email"
               />
-              <div class="input-file">
-                  <input 
-                    type="file"
-                    @change="onPreviewImg"
-                    v-show="false"
-                    accept="image/png, image/jpeg"
-                    id="file_input"
-                    >
-                <div class="file-custom" @click="onSelectImage">Selecciona una imatge de perfil</div>
-              </div>
-              <div class="flex justify-center img-preview">
-                <img v-show="localImage" :src="localImage" /> 
-              </div>
               <div><button :class="{ 'cursor-pointer button': formMeta.valid, 'cursor-not-allowed button': !formMeta.valid }">Guardar</button></div>
             </VForm>
         </Modal>
@@ -47,37 +46,85 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+/**
+ *TODO !!
+ * - ENVIAR EMAIL A USUARI amb códig al fer SUBMIT
+ * - GUARDAR BBDD dades al grup => id usuari
+ * - RECUPERAR DADES d'usuari mitjançant id usuari dels GUESTS
+ * - Vista usuari la mateixa sense el botó AFAGEIX INVITAT
+ * - BOTÓ veure amic invisible => redirect vista AMIC INIVISBLE
+ */
+
+import { ref, reactive, onMounted, onUpdated, computed, nextTick } from 'vue'
 import { object, string, ref as yupRef } from "yup";
+import { useStoreGroup } from '~~/stores/groups';
+import { storeToRefs } from 'pinia'
+import useUsers from '@/composables/users'
+import useGroups from '@/composables/groups'
+
+definePageMeta({
+  middleware: ["auth"]
+})
+
+//#ref reactive const 
+const storeGroup = useStoreGroup()
+const { group } = storeToRefs(storeGroup)
+const { getAllUsers } = useUsers()
+const { addGuestInGroup, getGuests } = useGroups()
 const schema = object({
   name: string().required(),
   email: string().required(),
-  file: string().required()
 });
 const dataFriend = reactive({
   name: '',
   email: '',
   file: ''
 })
-const localImage = ref(null)
+const usersParsed = ref([])
 const isOpenModal = ref(false);
+const isShowDropdownUsers = ref(false)
+const idGuest = ref('')
+//#end
+
+//#cycle life
+onMounted(async() => {
+  console.log(group.value)
+  usersParsed.value = await getAllUsers()
+  console.log('guests =>', await getGuests(group.value.id))
+})
+onUpdated(() => {
+  if(dataFriend.name === ''){
+    isShowDropdownUsers.value = false
+  }
+})
+//#end
+
+//#computed
+const getUsers = computed(() => {
+  return usersParsed.value.filter(user => user?.user.toLowerCase().includes(dataFriend.name.toLowerCase()))
+})
+//#end
+
+//#events
 const onCreateFriend = () => isOpenModal.value = true
 const onCloseModal = () => isOpenModal.value = false 
-const onPreviewImg = (event) => {
-  const input = event.target;
-  if (input.files && input.files[0]) {
-      const reader = new FileReader();
-      reader.onload = e => localImage.value = e.target.result; 
-      reader.readAsDataURL(input.files[0]);
-    }
+const onSelectUser = (event, idUser) => {
+  nextTick(() => {
+    idGuest.value = idUser
+    console.log('id=>', idGuest.value)
+    dataFriend.name = event.target.textContent
+    isShowDropdownUsers.value = false
+  })
 }
-const onSelectImage = () =>{
-  document.getElementById('file_input').click()
+const onKeyUp = () => {
+  isShowDropdownUsers.value = dataFriend.name.length >= 3
+}
+const onSubmitFriend = async () => {
+  await addGuestInGroup({idGroup: group.value.id, idGuest: idGuest.value})
 }
 
-definePageMeta({
-  middleware: ["auth"]
-})
+//#end
+
 </script>
 
 <style lang="scss" scoped>
@@ -105,28 +152,44 @@ definePageMeta({
   box-shadow:0 0 0 0.2rem #3F3E3E;
   filter:sepia()
 }
-.img-preview{
-  img{
-    min-width: 150px;
-    height: 150px;
-    object-fit: fill;
-    border-radius: 50%;
-  }
 
-}
-.file-custom{
-  text-align: center;
-  padding: 0.5rem;
-  margin-right: 2rem;
-  border-radius: 0.3rem;
-  color: #dbdbdb;
+.searching{
+  background: #3F3E3E;
+  max-height: 150px;
+  overflow-y: scroll;
+  border: 2px solid;
+  border-radius: 0.5rem;
+  padding: 0.2rem;
   width: 100%;
-  background-color: #1c1e21;
-  box-shadow: inset 0 0.0625em 0.225em 0.032222em rgba(10, 10, 10, 0.06);
-  margin-bottom: 1rem;
-  margin-top: 0.5rem;
-  cursor: pointer;
-  filter: sepia();
+  margin-right: 2rem;
+  ul{
+    li{
+      background: #3F3E3E;
+      color: yellow;
+      border: 2px solid yellow;
+      margin-bottom: 5px;
+      padding: 10px;
+      border-radius: 5px;
+      filter: sepia();
+      cursor: pointer;
+      position: relative;
+      z-index: 10;
+      &:hover{
+        background-color: grey;
+        filter: sepia();
+
+      }
+      img{
+        position: relative;
+        z-index: 11;
+        border-radius: 50%;
+        filter: contrast(100%);
+      }
+    }
+    li:last-child {
+      margin-bottom: 0;
+    }
+  }
 }
 
 </style>

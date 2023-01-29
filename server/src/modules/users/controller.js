@@ -16,7 +16,6 @@ module.exports = (dbInject) => {
             id: body.id,
             email: body.email,
             photo: body.photo,
-            groups: body.groups
         }
         const requestUser = await db.insertItem(TABLE, user)
         let insertId = 0;

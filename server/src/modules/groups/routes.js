@@ -8,7 +8,7 @@ router.get('/', getAllGroups)
 router.get('/:id', getGroup)
 router.post('/', /*security(),*/ addGroup)
 router.put('/', deleteGroup)
-router.post('/guest', /*security(),*/ addGuest)
+// router.put('/guest', /*security(),*/ addGuest)
 
 
 async function getAllGroups(req, res, next){
@@ -36,16 +36,17 @@ async function addGroup(req, res, next){
         next(error)
     }
 }
-async function addGuest(req, res, next){
-    try {
-         await controller.addGuest(req.body)
-            message = 'Invitat guardat correctament'
+// async function addGuest(req, res, next){
+//     console.log('req', req.body)
+//     try {
+//          await controller.addGuest(req.body)
+//             message = 'Invitat guardat correctament'
         
-        requests.success(req, res, message, 204)
-    } catch(error) {
-        next(error)
-    }
-}
+//         requests.success(req, res, message, 204)
+//     } catch(error) {
+//         next(error)
+//     }
+// }
 async function deleteGroup(req, res, next){
     try {
         const data = await controller.deleteGroup(req.body)

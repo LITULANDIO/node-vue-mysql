@@ -49,6 +49,8 @@ module.exports = (dbInject) => {
         db.insertItem(TABLE, authData)
     }
 
+    const getUsers =  () => db.getItems(TABLE, 'id, user')
+
     const addUser = async (data) => {
         const authData = {
             id: data.id,
@@ -69,6 +71,7 @@ module.exports = (dbInject) => {
     return {
         addUser,
         login,
-        logout
+        logout,
+        getUsers
     }
 }

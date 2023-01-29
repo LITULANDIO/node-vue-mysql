@@ -32,13 +32,22 @@ const connectMysql = () => {
 
 connectMysql();
 
-const getAllItems = (table) => {
+const getAllItems = (table, data = null) => {
     return new Promise((resolve, reject) => {
         connection.query(`SELECT * FROM ${table}`, (error, result) => {
             error ? reject(error) : resolve(result)
         })
     })
 }
+
+const getItems = (table, data = null) => {
+    return new Promise((resolve, reject) => {
+        connection.query(`SELECT ${data} FROM ${table}`, (error, result) => {
+            error ? reject(error) : resolve(result)
+        })
+    })
+}
+
 
 const getItem = (table, id) => {
     console.log('[get =>', table, id)
@@ -53,6 +62,15 @@ const insertItem = (table, data) => {
     console.log('[AddUser =>', data)
     return new Promise((resolve, reject) => {
         connection.query(`INSERT INTO ${table} SET ? ON DUPLICATE KEY UPDATE ?`, [data,data], (error, result) => {
+            error ? reject(error) : resolve(result)
+        })
+    })
+}
+
+const updateItem = (table, column, data, id) => {
+    console.log('[Update =>', table, column, data, id)
+    return new Promise((resolve, reject) => {
+        connection.query(`UPDATE ${table} SET ${column}=${data} WHERE id=${id}`,[id], (error, result) => {
             error ? reject(error) : resolve(result)
         })
     })
@@ -80,7 +98,10 @@ module.exports = {
     getItem,
     insertItem,
     deleteItem,
-    query
+    getAllItems,
+    getItems,
+    query,
+    updateItem
 }
 
 

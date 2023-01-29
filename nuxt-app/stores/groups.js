@@ -4,11 +4,11 @@ export const useStoreGroup = defineStore('group', {
   state: () => {
     return {
      group: {
+        id: '',
         admin: '',
         name: '',
         date: '',
         budget: '',
-        guests: null
      }
 
     }

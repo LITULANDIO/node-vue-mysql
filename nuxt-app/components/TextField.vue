@@ -4,7 +4,7 @@
     <div class="field-body">
       <div class="field">
         <p class="control has-icons-left has-icons-right">
-          <VField :name="name" :rules="`required|${mame}`" v-slot="{ field, meta, errors }">
+          <VField :name="name" :rules="`required|${name}`" v-slot="{ field, meta, errors }">
             <input
               v-bind="field"
               class="input"
@@ -13,6 +13,7 @@
               autocomplete="off"
               :type="type"
               :name="name"
+              :value="value"
               @input="handleValue($event)"
               @change="previewFile" />
             <span class="icon is-small is-left">
@@ -54,6 +55,9 @@ const props = defineProps({
   icon: {
     type: String,
     default: "",
+  },
+  value: {
+    type: String
   },
   modelValue: {
         type: [String, Object],
