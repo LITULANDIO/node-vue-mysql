@@ -20,7 +20,7 @@ async function getGuestsOfGroup(req, res, next){
 }
 
 async function addGuestOfGroup(req, res, next){
-    console.log('req =>', req.body)
+    console.log('req addGuest=>', req.body)
     try {
         await controller.addGuestOfGroup(req.body)
         req.body.id === 0 ? message = 'Guest guardat correctament' : message = 'Guest actualitzat correctament'

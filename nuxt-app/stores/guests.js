@@ -5,18 +5,30 @@ export const useStoreGuest = defineStore('guests', {
   state: () => {
     return {
      data: null,
-     loading: ''
+     isLoading: false
     }
   },
   actions: {
     async getGuests (id) {
+       this.isLoading = true
         const guests = await DataProvider({
             providerType: 'GUESTS',
             type: 'GET_GUESTS',
             params: id
         })
-       return this.data = guests?.body
-    }
+       this.data = guests?.body
+       this.isLoading = false
+    },
+    async addGuestInGroup ({data, id}) {
+      this.isLoading = true
+      await DataProvider({
+          providerType: 'GUESTS',
+          type: 'INSERT_GUEST',
+          params: JSON.parse(JSON.stringify(data))
+      })
+    this.getGuests(id)
+    this.isLoading = false
+    } 
   },
   getter: {},
   persist: true
@@ -26,3 +38,4 @@ export const useStoreGuest = defineStore('guests', {
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useStoreGuest, import.meta.hot))
 }
+

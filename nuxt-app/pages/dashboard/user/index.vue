@@ -2,18 +2,18 @@
     <Title>Dashboard {{ user.name }}</Title>
     <NuxtLayout/>
     <section class="flex justify-center items-center flex-col">
-      <span v-if=" typeof loading === 'string'" style="background-color: yellow; color: red">{{ loading }}</span>
-      <div class="box-group" v-for="group in loading" :key="group.id">
+      <span v-if="isLoading" style="background-color: yellow; color: red">LOADING...</span>
+      <div v-else class="box-group" v-for="group in groups" :key="group.id">
         <div @click="onGoGroup(group)">{{ group.name }}</div>
       </div>
     </section>
     <section id="modal">
-      <Modal header="Crear un grupo" :show="isOpenModal" @onClose="onCloseModal">
+      <Modal header="Crear un grupo" :show="isOpenModalCreate" @onClose="onCloseModalCreate">
             <VForm
               :validation-schema="schema"
               :initial-values="dataUser"
               v-slot="{ meta: formMeta, errors: formErrors }"
-              @submit="onSubmitGroup"
+              @submit="handleSubmit"
             >
               <TextField
                 type="text"
@@ -46,7 +46,7 @@
               <div><button :class="{ 'cursor-pointer button-disabled': formMeta.valid, 'cursor-not-allowed button': !formMeta.valid }">Guardar</button></div>
             </VForm>
         </Modal>
-        <Modal v-if="isOpenModalEntryGroup" header="Entra al grup" :show="isOpenModalEntryGroup" @onClose="onCloseModal">
+        <Modal header="Entra al grup" :show="isOpenModalEntryGroup" @onClose="onCloseModalEntry">
           <VForm
             :validation-schema="schema"
             :initial-values="dataUser"
@@ -99,10 +99,10 @@ definePageMeta({
 const storeAuth = useStoreAuth()
 const storeGroup = useStoreGroup()
 const { user } = storeToRefs(storeAuth)
-const { group, loading } = storeToRefs(storeGroup)
-const isOpenModal = ref(false)
+const { group, groups, isLoading } = storeToRefs(storeGroup)
+const isOpenModalCreate = ref(false)
 const isOpenModalEntryGroup = ref(false)
-const dataGroup = reactive({
+let dataGroup = reactive({
   id: 0,
   name: '',
   date: '',
@@ -129,59 +129,50 @@ const unitGroup = computed(() => group.value)
 //# end
 
 //# events
-const onCreateGroup = () => isOpenModal.value = true
-const onCloseModal = () => isOpenModal.value = false 
+const onCreateGroup = () => isOpenModalCreate.value = true
+const onCloseModalCreate = () => isOpenModalCreate.value = false 
+const onCloseModalEntry = () => isOpenModalEntryGroup.value = false 
+
 const onShowModalCodeGroup = () => {
   isOpenModalEntryGroup.value = true
   dataUser.user = user.value.name
 }
-const onSubmitGroup = async () => {
-  await DataProvider({
-      providerType: 'GROUPS',
-      type: 'INSERT_GROUP',
-      params: JSON.parse(JSON.stringify(dataGroup))
-    })
-    storeGroup.getGroups(user.value.id)
+
+const handleSubmit = async () => {
+  await storeGroup.addGroup({
+    dataGroup, 
+    idUser: user.value.id
+  })
+  isOpenModalCreate.value = false
 }
-const onGoGroup = (group) => {
-  console.log({group})
-  unitGroup.value.id = group.id
-  unitGroup.value.admin = group.admin
-  unitGroup.value.name = group.name
-  unitGroup.value.date = group.date
-  unitGroup.value.budget = group.budget
-  unitGroup.value.snug = group.snug,
-  navigateTo(`/dashboard/user/group/${group.snug}`)
+
+const onGoGroup = (groupSelceted) => {
+  unitGroup.value.id = groupSelceted.id
+  unitGroup.value.admin = groupSelceted.admin
+  unitGroup.value.name = groupSelceted.name
+  unitGroup.value.date = groupSelceted.date
+  unitGroup.value.budget = groupSelceted.budget
+  unitGroup.value.snug = groupSelceted.snug
+  navigateTo(`/dashboard/user/group/${groupSelceted.snug}`)
 }
 
 const onGoGroupWithCode = async () => {
-  const res = await DataProvider({
+  const fetchUser = await DataProvider({
       providerType: 'GROUPS',
       type: 'MATCH_CODE',
       params: dataUser
     })
-    if(res.body.error) {
+    if(fetchUser.body.error) {
       errorEntryGroup.value = true;
-      errorStr.value = res.body.msg
-      console.log('ERROR', res)
+      errorStr.value = fetchUser.body.msg
       return
     }
-    console.log('RESSSSSSSSSSS',{res})
-    navigateTo(`/dashboard/user/group/${res.body?.snug}`)
-
+    navigateTo(`/dashboard/user/group/${fetchUser.body?.snug}`)
 }
 //# end
 
 //# cycle life
 onMounted(() => {
-  storeGroup.$onAction(({after, args, context, name, onError, store}) => {
-    if (name == 'getGroups') {
-      store.loading = 'Loading data'
-    }
-    after((val) => {
-      store.loading = val
-    })
-  })
   storeGroup.getGroups(user.value.id)
 })
 //# end

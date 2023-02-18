@@ -1,8 +1,8 @@
 <template>
     <NuxtLayout/>
     <section id="modal">
-      <span v-if=" typeof loading === 'string'" style="background-color: yellow; color: red">{{ loading }}</span>
-      <div style="background-color: black; color: white" v-for="guest in loading.guests">
+      <span v-if="isLoading" style="background-color: yellow; color: red">LOADING...</span>
+      <div v-else style="background-color: black; color: white" v-for="guest in data.guests">
        {{ guest.user }}
       </div>
       <Modal v-if="isOpenModal" header="Afegir amic invisible" :show="isOpenModal" @onClose="onCloseModal">
@@ -90,9 +90,9 @@ definePageMeta({
 const storeGroup = useStoreGroup()
 const storeGuest = useStoreGuest()
 const { group } = storeToRefs(storeGroup)
-const { data, loading } = storeToRefs(storeGuest)
+const { data, isLoading } = storeToRefs(storeGuest)
 const { getAllUsers } = useUsers()
-const { addGuestInGroup } = useGroups()
+// const { addGuestInGroup } = useGroups()
 const route = useRoute()
 const schema = object({
   name: string().required(),
@@ -116,22 +116,11 @@ const id = ref('')
 //#cycle life
 onMounted(async() => {
   if (route.params.id) {
-  id.value = route.params.id
-}
-  console.log('ID =>>>>>>>>>>>', id.value)
-  console.log('GRUPO =>', group.value)
-  usersParsed.value = await getAllUsers()
-  storeGuest.$onAction(({after, args, context, name, onError, store}) => {
-    if (name == 'getGuests') {
-      store.loading = 'Loading data'
-    }
-    after((val) => {
-      store.loading = val
-    })
-  })
-  loading.value = await storeGuest.getGuests(id.value)
-  console.log('guestsssss =>',  await storeGuest.getGuests(id.value))
-  console.log('loading.value =>', loading.value)
+    id.value = route.params.id
+  }
+ usersParsed.value = await getAllUsers()
+ await storeGuest.getGuests(id.value)
+
 })
 onUpdated(() => {
   if(dataFriend.name === ''){
@@ -167,8 +156,10 @@ const onSubmitFriend = async () => {
     isExistedGuest.value = true
     return
   }
-  await addGuestInGroup({idGroup: group.value.id, idGuest: idGuest.value})
-  storeGuest.getGuests(id.value)
+  await storeGuest.addGuestInGroup({
+    data: {idGroup: group.value.id, idGuest: idGuest.value},
+    id: id.value
+  })
   isOpenModal.value = false
   DataProvider({
     providerType: 'MAIL',
