@@ -10,7 +10,6 @@ module.exports = (dbInject) => {
     }
     
     const getGuestsOfGroup = async (id) => {
-        console.log('======METHOD CLAVE==========')
         const groups = await db.getAllItems('groups')
         let groupMatch = {}
         groups.map(group => {
@@ -18,7 +17,6 @@ module.exports = (dbInject) => {
                 groupMatch = group
             }
         })
-        console.log('ID =>>>>>>>',{id})
         const guests = await db.getAllItems(TABLE)
         const users = await db.getAllItems('users')
         const auth = await db.getAllItems('auth')
@@ -57,8 +55,6 @@ module.exports = (dbInject) => {
                 }
             })
         })
-        console.log('======METHOD END==========')
-
         return guestListFull
     }
     const addGuestOfGroup = async (body) => {
