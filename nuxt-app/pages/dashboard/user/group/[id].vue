@@ -1,7 +1,11 @@
 <template>
     <NuxtLayout/>
     <section id="modal">
-      <Modal header="Afegir amic invisible" :show="isOpenModal" @onClose="onCloseModal">
+      <span v-if=" typeof loading === 'string'" style="background-color: yellow; color: red">{{ loading }}</span>
+      <div style="background-color: black; color: white" v-for="guest in loading.guests">
+       {{ guest.user }}
+      </div>
+      <Modal v-if="isOpenModal" header="Afegir amic invisible" :show="isOpenModal" @onClose="onCloseModal">
             <VForm
               :validation-schema="schema"
               :initial-values="dataFriend"
@@ -27,14 +31,24 @@
                     </li>
                   </ul>
                 </div>
+                <div v-if="isExistedGuest" class="exist-guest">Ja has afegit aquest usuari</div>
               <TextField
                 type="text"
-                name="email"
+                name="send"
                 label="Email"
-                placeholder="Email"
+                placeholder="Receptor Email"
                 icon="fa-envelope"
-                v-model="dataFriend.email"
-                :value="dataFriend.email"
+                v-model="dataFriend.send"
+                :value="dataFriend.send"
+              />
+              <TextField
+                type="text"
+                name="to"
+                label="Email"
+                placeholder="Emisor email"
+                icon="fa-envelope"
+                v-model="dataFriend.to"
+                :value="dataFriend.to"
               />
               <div><button :class="{ 'cursor-pointer button': formMeta.valid, 'cursor-not-allowed button': !formMeta.valid }">Guardar</button></div>
             </VForm>
@@ -48,49 +62,76 @@
 <script setup>
 /**
  *TODO !!
- * - ENVIAR EMAIL A USUARI amb códig al fer SUBMIT
- * - GUARDAR BBDD dades al grup => id usuari
- * - RECUPERAR DADES d'usuari mitjançant id usuari dels GUESTS
+ * - ENVIAR EMAIL A USUARI amb códig al fer SUBMIT => DONE
+ * =============================================================
+ * - Controlar que si ha afegit un usuari, no el torni a afegir => DONE
+ * =============================================================
+ * - GUARDAR BBDD dades al grup => id usuari => DONE
+ * - RECUPERAR DADES d'usuari mitjançant id usuari dels GUESTS AMB PINIA => DONE
+ * =============================================================
  * - Vista usuari la mateixa sense el botó AFAGEIX INVITAT
  * - BOTÓ veure amic invisible => redirect vista AMIC INIVISBLE
+ * =============================================================
  */
 
 import { ref, reactive, onMounted, onUpdated, computed, nextTick } from 'vue'
 import { object, string, ref as yupRef } from "yup";
 import { useStoreGroup } from '~~/stores/groups';
+import { useStoreGuest } from '~~/stores/guests';
 import { storeToRefs } from 'pinia'
 import useUsers from '@/composables/users'
 import useGroups from '@/composables/groups'
-
+import { DataProvider } from '@/data-provider/index'
 definePageMeta({
   middleware: ["auth"]
 })
 
 //#ref reactive const 
 const storeGroup = useStoreGroup()
+const storeGuest = useStoreGuest()
 const { group } = storeToRefs(storeGroup)
+const { data, loading } = storeToRefs(storeGuest)
 const { getAllUsers } = useUsers()
-const { addGuestInGroup, getGuests } = useGroups()
+const { addGuestInGroup } = useGroups()
+const route = useRoute()
 const schema = object({
   name: string().required(),
-  email: string().required(),
+  send: string().required(),
+  to: string().required(),
 });
 const dataFriend = reactive({
   name: '',
-  email: '',
+  send: '',
+  to: '',
   file: ''
 })
 const usersParsed = ref([])
 const isOpenModal = ref(false);
 const isShowDropdownUsers = ref(false)
 const idGuest = ref('')
+const isExistedGuest = ref(false)
+const id = ref('')
 //#end
 
 //#cycle life
 onMounted(async() => {
-  console.log(group.value)
+  if (route.params.id) {
+  id.value = route.params.id
+}
+  console.log('ID =>>>>>>>>>>>', id.value)
+  console.log('GRUPO =>', group.value)
   usersParsed.value = await getAllUsers()
-  console.log('guests =>', await getGuests(group.value.id))
+  storeGuest.$onAction(({after, args, context, name, onError, store}) => {
+    if (name == 'getGuests') {
+      store.loading = 'Loading data'
+    }
+    after((val) => {
+      store.loading = val
+    })
+  })
+  loading.value = await storeGuest.getGuests(id.value)
+  console.log('guestsssss =>',  await storeGuest.getGuests(id.value))
+  console.log('loading.value =>', loading.value)
 })
 onUpdated(() => {
   if(dataFriend.name === ''){
@@ -118,9 +159,29 @@ const onSelectUser = (event, idUser) => {
 }
 const onKeyUp = () => {
   isShowDropdownUsers.value = dataFriend.name.length >= 3
+  isExistedGuest.value = false
 }
 const onSubmitFriend = async () => {
+  const isExistGuest = data.value.guests.some(guest => guest.id === idGuest.value)
+  if (isExistGuest) {
+    isExistedGuest.value = true
+    return
+  }
   await addGuestInGroup({idGroup: group.value.id, idGuest: idGuest.value})
+  storeGuest.getGuests(id.value)
+  isOpenModal.value = false
+  DataProvider({
+    providerType: 'MAIL',
+    type: 'SENDMAIL',
+    params: {
+      sender: dataFriend.send,
+      to: dataFriend.to,
+      name: group.value.name,
+      user: dataFriend.name,
+      idAdmin: group.value.admin,
+      
+    }
+  })
 }
 
 //#end
@@ -177,7 +238,6 @@ const onSubmitFriend = async () => {
       &:hover{
         background-color: grey;
         filter: sepia();
-
       }
       img{
         position: relative;
@@ -190,6 +250,20 @@ const onSubmitFriend = async () => {
       margin-bottom: 0;
     }
   }
+}
+.exist-guest{
+  background: #3F3E3E;
+  color: yellow;
+  border: 2px solid yellow;
+  margin-bottom: 5px;
+  padding: 10px;
+  border-radius: 5px;
+  filter: sepia();
+  cursor: pointer;
+  position: relative;
+  z-index: 10;
+  width: 105%;
+     
 }
 
 </style>

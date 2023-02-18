@@ -10,12 +10,11 @@ export const useStoreUsers = defineStore('store', {
   },
   actions: {
     getAllUsers: async function() {
-        const result = await DataProvider({
+        const users = await DataProvider({
             providerType: 'USERS',
             type: 'GET_USERS',
           })
-        this.users = result.body   
-        console.log('users =>', this.users)
+        this.users = users?.data?.body   
     }
   },
   getter: {
@@ -28,3 +27,4 @@ export const useStoreUsers = defineStore('store', {
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useStoreUsers, import.meta.hot))
 }
+

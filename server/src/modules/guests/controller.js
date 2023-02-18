@@ -10,6 +10,15 @@ module.exports = (dbInject) => {
     }
     
     const getGuestsOfGroup = async (id) => {
+        console.log('======METHOD CLAVE==========')
+        const groups = await db.getAllItems('groups')
+        let groupMatch = {}
+        groups.map(group => {
+            if (group.code.includes(id)) {
+                groupMatch = group
+            }
+        })
+        console.log('ID =>>>>>>>',{id})
         const guests = await db.getAllItems(TABLE)
         const users = await db.getAllItems('users')
         const auth = await db.getAllItems('auth')
@@ -18,7 +27,7 @@ module.exports = (dbInject) => {
         let guestListFull = { group: 0, guests: [] }
     
         guests.find(guest => {
-            if (parseInt(id) === guest.idGroup) {
+            if (groupMatch.id === guest.idGroup) {
                     idsGuestsList.push({ idGuest: guest.idGuest })
             }
         })
@@ -36,7 +45,8 @@ module.exports = (dbInject) => {
         auth.map(auth => {
             guestsList.map(guest => {
                 if (auth.id === guest.id) {
-                    guestListFull.group = parseInt(id)
+                    delete groupMatch.code
+                    guestListFull.group = groupMatch
                     guestListFull.guests.push({
                         id: guest.id,
                         email: guest.email,
@@ -46,12 +56,12 @@ module.exports = (dbInject) => {
                     })
                 }
             })
-
         })
+        console.log('======METHOD END==========')
+
         return guestListFull
     }
     const addGuestOfGroup = async (body) => {
-        console.log('body=>', body)
         const guestOfGroup = {
            idGroup: body.idGroup,
            idGuest: body.idGuest

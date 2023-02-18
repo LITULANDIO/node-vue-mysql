@@ -1,6 +1,6 @@
 const TABLE = 'auth'
+const auth = require('../../auth');
 const bcrypt = require('bcrypt')
-const auth = require('../../auth')
 
 module.exports = (dbInject) => {
 
@@ -13,6 +13,7 @@ module.exports = (dbInject) => {
         let data;
         try{
             data = await db.query(TABLE, { user: user });
+            console.log(user, {data})
             data.active = 1
             db.insertItem(TABLE, data)
             console.log(data)
@@ -25,7 +26,7 @@ module.exports = (dbInject) => {
             
         }
         return bcrypt.compare(password, data.password)
-            .then(result => {
+        .then(result => {
                 if (result === true) {
                     return { token: auth.assignToken({...data}), id: data.id, user: data.user }
                 } else {
@@ -36,6 +37,7 @@ module.exports = (dbInject) => {
                     }
                 }
             })
+            
     }
 
     const logout = async (data) => {

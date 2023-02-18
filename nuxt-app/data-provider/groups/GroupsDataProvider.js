@@ -9,7 +9,7 @@ export const GroupsDataProvider = ({ type, params, baseApiUrl }) => {
                 options = {
                     method: "POST",
                     url: `${baseApiUrl}/user/group`,
-                    data: params,
+                    data: JSON.parse(JSON.stringify(params)),
                     headers: {
                         Accept: "application/json",
                     }
@@ -53,7 +53,21 @@ export const GroupsDataProvider = ({ type, params, baseApiUrl }) => {
             } else {
                 throw new Error('Error baseApiUrl are necessary')
             }
-            break;        
+            break;      
+        case "MATCH_CODE":
+                console.log({options})
+    
+            if (baseApiUrl) {
+                options = {
+                    method: "POST",
+                    url: `${baseApiUrl}/user/group/matchCode`,
+                    data: JSON.parse(JSON.stringify(params)) 
+                }
+                console.log({options})
+            } else {
+                throw new Error('Error baseApiUrl are necessary')
+            }
+            break;    
     }
 
     if (!!options) {
