@@ -44,10 +44,11 @@ const onClose = () => emit("onClose")
       border: 1px solid;
       border-radius: 8px;
       padding: 15px;
-      position: absolute;
+      position: fixed;
+      top: 50%;
       z-index: 9999;
       background: white;
-      margin-top: 0rem;
+      margin-top: 0rem; //-15rem;
       &-header {
         display: flex;
         justify-content: space-between;

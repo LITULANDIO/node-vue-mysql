@@ -25,6 +25,7 @@
             <div class="input-file">
               <input 
                 type="file"
+                name="file"
                 @change="onPreviewImg"
                 v-show="false"
                 accept="image/png, image/jpeg"
@@ -106,6 +107,7 @@
       )
       .label("Email Address"),
     user: string().required(),
+    file: string().required(),
     password: string().required().min(8).label("Your Password"),
     confirmed: string()
       .required()
