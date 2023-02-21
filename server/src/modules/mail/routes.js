@@ -12,6 +12,7 @@ apiKey.apiKey = process.env.API_MAIL
 const joinSpacesStr = (str) => str.replace(/\s/g,'')
 
 function sendMailGuest(req, res, next) {
+    debugger
     try{
         const transactionalEmailApi = new SibMailSdk.TransactionalEmailsApi()
 

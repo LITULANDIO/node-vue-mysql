@@ -19,12 +19,12 @@ export const useStoreGuest = defineStore('guests', {
        this.data = guests?.body
        this.isLoading = false
     },
-    async addGuestInGroup ({data, id}) {
+    async addGuestInGroup ({guest, id}) {
       this.isLoading = true
       await DataProvider({
           providerType: 'GUESTS',
           type: 'INSERT_GUEST',
-          params: JSON.parse(JSON.stringify(data))
+          params: JSON.parse(JSON.stringify(guest))
       })
     this.getGuests(id)
     this.isLoading = false

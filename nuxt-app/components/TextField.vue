@@ -149,63 +149,7 @@ const previewFile = () => {
   //border: 1px solid red;
 
 }
+
 </style>
 
 
-<!-- <template>
-    <div style="display:block">
-    <VField 
-        :typw="inputType" 
-        :name="name" 
-        :rules="isRequired" 
-        :placeholder="placeholder" 
-        @input="handleValue($event)" />
-    <VErrorMessage :name="placeholder" class="help is-danger" />
-    </div>
-
-</template>
-
-<script setup>
-import { defineProps, defineEmits } from 'vue';
-
-const props = defineProps({
-    inputType: {
-        type: String,
-        default: 'text'
-    },
-    name: {
-        type: String
-    },
-    placeholder: {
-        type: String
-    },
-    modelValue: {
-        type: [String, Object],
-        required: true
-    }
-})
-const emit = defineEmits(['update:modelValue'])
-
-
-const handleValue = (event) => {
-    emit('update:modelValue', event.target.value)
-}
-const isRequired = (value) => {
-    if (value && value.trim()) {
-        return true
-    }
-    return 'This is required'
-}
-</script>
-
-<style lang="scss" scoped>
-input{
-    height: 2rem;
-    margin-bottom: 0.5rem;
-}
-.is-danger{
-    color: red;
-    font-size: 0.7rem;
-    display: block;
-}
-</style> -->
