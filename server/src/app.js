@@ -6,6 +6,7 @@ const auth = require('./modules/auth/routes')
 const groups = require('./modules/groups/routes')
 const wishes = require('./modules/wishes/routes')
 const guests = require('./modules/guests/routes')
+const mail = require('./modules/mail/routes')
 const cors = require('cors')
 const app = express();
 const error = require('./red/errors')
@@ -42,6 +43,7 @@ app.use('/api/auth', auth)
 app.use('/api/user/group', groups)
 app.use('/api/user/group/guests', guests)
 app.use('/api/user/wishes', wishes)
+app.use('/api/users/mail', mail)
 
 app.use(error)
 

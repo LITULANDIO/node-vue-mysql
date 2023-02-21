@@ -49,10 +49,10 @@ const getItems = (table, data = null) => {
 }
 
 
-const getItem = (table, id) => {
-    console.log('[get =>', table, id)
+const getItem = (table, id, column = 'id') => {
+    console.log('[get =>', table, id, column)
     return new Promise((resolve, reject) => {
-        connection.query(`SELECT * FROM ${table} WHERE id=${id}`, (error, result) => {
+        connection.query(`SELECT * FROM ${table} WHERE ${column}=${id}`, (error, result) => {
             error ? reject(error) : resolve(result)
         })
     })

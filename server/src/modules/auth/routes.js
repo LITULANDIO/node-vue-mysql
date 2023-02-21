@@ -39,7 +39,7 @@ async function getUsers (req, res, next) {
         })
         return joinListData.push(joinObjData)
      })
-        console.log('join =>',  joinListData)
+        //console.log('join =>',  joinListData)
         requests.success(req, res, joinListData, 200)
     } catch(error) {
         next(error)

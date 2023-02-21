@@ -2,17 +2,18 @@
     <Title>Dashboard {{ user.name }}</Title>
     <NuxtLayout/>
     <section class="flex justify-center items-center flex-col">
-      <div class="box-group" v-for="group in groups.values" :key="group.id">
+      <span v-if="isLoading" style="background-color: yellow; color: red">LOADING...</span>
+      <div v-else class="box-group" v-for="group in groups" :key="group.id">
         <div @click="onGoGroup(group)">{{ group.name }}</div>
       </div>
     </section>
     <section id="modal">
-      <Modal header="Crear un grupo" :show="isOpenModal" @onClose="onCloseModal">
+      <Modal header="Crear un grupo" :show="isOpenModalCreate" @onClose="onCloseModalCreate">
             <VForm
               :validation-schema="schema"
               :initial-values="dataUser"
               v-slot="{ meta: formMeta, errors: formErrors }"
-              @submit="onSubmitGroup"
+              @submit="handleSubmit"
             >
               <TextField
                 type="text"
@@ -45,7 +46,7 @@
               <div><button :class="{ 'cursor-pointer button-disabled': formMeta.valid, 'cursor-not-allowed button': !formMeta.valid }">Guardar</button></div>
             </VForm>
         </Modal>
-        <Modal header="Entra al grup" :show="isOpenModal" @onClose="onCloseModal">
+        <Modal header="Entra al grup" :show="isOpenModalEntryGroup" @onClose="onCloseModalEntry">
           <VForm
             :validation-schema="schema"
             :initial-values="dataUser"
@@ -70,13 +71,15 @@
               v-model="dataUser.password"
               :value="dataUser.password"
             />
-            <div><button :class="{ 'cursor-pointer button-disabled': formMeta.valid, 'cursor-not-allowed button': !formMeta.valid }">Entrar</button></div>
+            <div v-if="errorEntryGroup" class="mb-3 text-red-600">{{ errorStr }}</div>
+            <div><button @click="onGoGroupWithCode" :class="{ 'cursor-pointer button-disabled': formMeta.valid, 'cursor-not-allowed button': !formMeta.valid }">Entrar</button></div>
           </VForm>
+
         </Modal>
     </section>
     <section class="flex justify-center items-center bottom-0 fixed w-full mb-3">
       <div class="create-group" @click="onCreateGroup"><span>CREAR GRUP</span></div>
-      <div class="create-group ml-3" @click="onCreateGroup"><span>UNIRSE A UN GRUP</span></div>
+      <div class="create-group ml-3" @click="onShowModalCodeGroup"><span>UNIRSE A UN GRUP</span></div>
     </section>
 </template>
 
@@ -87,25 +90,19 @@ import { useStoreAuth } from '~~/stores/auth';
 import { useStoreGroup } from '~~/stores/groups';
 import { object, string, ref as yupRef } from "yup";
 import { storeToRefs } from 'pinia'
-import useGroups from '@/composables/groups'
-import useUsers from '@/composables/users'
-const storeAuth = useStoreAuth()
-const storeGroup = useStoreGroup()
-const { user } = storeToRefs(storeAuth)
-const { group } = storeToRefs(storeGroup)
-const { getGroups } = useGroups()
-const { getAllUsers } = useUsers()
-
 
 definePageMeta({
   middleware: ["auth"]
 })
-const isOpenModal = ref(false);
-const unitGroup = computed(() => group.value)
-const groups = reactive([])
-const onCreateGroup = () => isOpenModal.value = true
-const onCloseModal = () => isOpenModal.value = false 
-const dataGroup = reactive({
+
+//# const, ref, reactive
+const storeAuth = useStoreAuth()
+const storeGroup = useStoreGroup()
+const { user } = storeToRefs(storeAuth)
+const { group, groups, isLoading } = storeToRefs(storeGroup)
+const isOpenModalCreate = ref(false)
+const isOpenModalEntryGroup = ref(false)
+let dataGroup = reactive({
   id: 0,
   name: '',
   date: '',
@@ -118,25 +115,67 @@ const schema = object({
   date: string().required(),
   budget: string().required()
 });
-const onSubmitGroup = async () => {
-  await DataProvider({
-      providerType: 'GROUPS',
-      type: 'INSERT_GROUP',
-      params: JSON.parse(JSON.stringify(dataGroup))
-    })
-}
-const onGoGroup = (group) => {
-  unitGroup.value.id = group.id
-  unitGroup.value.admin = group.admin
-  unitGroup.value.name = group.name
-  unitGroup.value.date = group.date
-  unitGroup.value.budget = group.budget
-  navigateTo(`/dashboard/user/group/${group?.code.split('/')[1] || group?.code}`)
-}
-onMounted(async () => {
-  groups.values = await getGroups(user.value.id)
-  console.log('USERS', await getAllUsers())
+const dataUser = reactive({
+  user: '',
+  password: ''
 })
+const errorEntryGroup = ref(false)
+const errorStr = ref('')
+//# end 
+
+//# computed
+const unitGroup = computed(() => group.value)
+
+//# end
+
+//# events
+const onCreateGroup = () => isOpenModalCreate.value = true
+const onCloseModalCreate = () => isOpenModalCreate.value = false 
+const onCloseModalEntry = () => isOpenModalEntryGroup.value = false 
+
+const onShowModalCodeGroup = () => {
+  isOpenModalEntryGroup.value = true
+  dataUser.user = user.value.name
+}
+
+const handleSubmit = async () => {
+  await storeGroup.addGroup({
+    dataGroup, 
+    idUser: user.value.id
+  })
+  isOpenModalCreate.value = false
+}
+
+const onGoGroup = (groupSelceted) => {
+  unitGroup.value.id = groupSelceted.id
+  unitGroup.value.admin = groupSelceted.admin
+  unitGroup.value.name = groupSelceted.name
+  unitGroup.value.date = groupSelceted.date
+  unitGroup.value.budget = groupSelceted.budget
+  unitGroup.value.snug = groupSelceted.snug
+  navigateTo(`/dashboard/user/group/${groupSelceted.snug}`)
+}
+
+const onGoGroupWithCode = async () => {
+  const fetchUser = await DataProvider({
+      providerType: 'GROUPS',
+      type: 'MATCH_CODE',
+      params: dataUser
+    })
+    if(fetchUser.body.error) {
+      errorEntryGroup.value = true;
+      errorStr.value = fetchUser.body.msg
+      return
+    }
+    navigateTo(`/dashboard/user/group/${fetchUser.body?.snug}`)
+}
+//# end
+
+//# cycle life
+onMounted(() => {
+  storeGroup.getGroups(user.value.id)
+})
+//# end
 </script>
 
 <style lang="scss" scoped>
